@@ -16,34 +16,30 @@ jobs:
           echo "Issue number: $issue_number"
           echo "Issue title: $issue_title"
 
-      - name: "Create comment (gh)"
-        run: |
-          gh issue comment $issue_number --body "Thanks for opening this issue! We'll take a look into it."
-
-      - name: Create comment (dynamic with emojis & Markdown)
-        run: |
-          gh issue comment $issue_number --body " Thanks for opening this issue, @$issue_author! We'll investigate this further. 
-
-          **Here are some helpful tips to get started:**
-
-          * [Provide specific resources or links relevant to the issue type.]
-
-          **Please let us know if you have any additional questions.**
-
-          **- The $issue_author Team**"
-          env:
-            ISSUE_AUTHOR: ${{ github.event.issue.user.login }}  # Get username of issue author     
-
-      - name: Create comment (conditional based on label presence)
-        uses: actions/github-script@v6
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v4
         with:
-          script: |
-            github.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: context.issue.labels.some(label => label.name === 'help-wanted') ?
-                ' We noticed you added the "help-wanted" label. Feel free to tag community members who might have expertise in this area! ' :
-                'Thanks for opening this issue! We\'ll get back to you soon.'
-            })          
-    
+          issue-number: 1
+          body: |
+            This is a multi-line test comment
+            - With GitHub **Markdown** :sparkles:
+            - Created by [create-or-update-comment][1]
+
+            [1]: https://github.com/peter-evans/create-or-update-comment
+          reactions: '+1'
+
+  comment-with-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create comment with API
+        run: |
+          gh api -X POST \
+            http://api.github.com/repo/$(ORGANIZATION)/$(REPOSITORY)/issues/$(ISSUE_NUMBER)/comments \
+            -f body='
+            This is a multi-line test comment
+            '
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ORGANIZATION: ${{ github.event.organization.login }}
+          REPOSITORY: ${{ github.event.repository.name }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
