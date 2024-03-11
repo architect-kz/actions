@@ -13,4 +13,4 @@ jobs:
         run: |
           gh issue comment ${{ github.event.issue.number }} --body "Thanks for opening this issue! We'll take a look into it."
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
