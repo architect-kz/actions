@@ -2,13 +2,48 @@ name: Create a comment on a new issue
 
 on:
   issues:
-    types: [opened]
+    types: [ opened ]
 
 jobs:
-  comment-with-action:
+  comment-on-issue:
     runs-on: ubuntu-latest
     steps:
-      - name: "dump github context"
-        run: echo '${{toJSON(github.event)}}' | jq
-        shell: bash
+      - name: "Get issue number and title"
+        id: get-issue-info
+        run: |
+          issue_number=${{ github.event.issue.number }}
+          issue_title="${{ github.event.issue.title }}"
+          echo "Issue number: $issue_number"
+          echo "Issue title: $issue_title"
+
+      - name: "Create comment (gh)"
+        run: |
+          gh issue comment $issue_number --body "Thanks for opening this issue! We'll take a look into it."
+
+      - name: Create comment (dynamic with emojis & Markdown)
+        run: |
+          gh issue comment $issue_number --body " Thanks for opening this issue, @$issue_author! We'll investigate this further. 
+
+          **Here are some helpful tips to get started:**
+
+          * [Provide specific resources or links relevant to the issue type.]
+
+          **Please let us know if you have any additional questions.**
+
+          **- The $issue_author Team**"
+          env:
+            ISSUE_AUTHOR: ${{ github.event.issue.user.login }}  # Get username of issue author     
+
+      - name: Create comment (conditional based on label presence)
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: context.issue.labels.some(label => label.name === 'help-wanted') ?
+                ' We noticed you added the "help-wanted" label. Feel free to tag community members who might have expertise in this area! ' :
+                'Thanks for opening this issue! We\'ll get back to you soon.'
+            })          
     
