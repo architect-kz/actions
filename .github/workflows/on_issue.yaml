@@ -1,13 +1,16 @@
-name: Comment when opened
+name: Comment on New Issue
+
 on:
   issues:
-    types:
-      - opened
+    types: [ opened ]
+
 jobs:
-  comment:
+  comment-on-issue:
     runs-on: ubuntu-latest
     steps:
-      - run: gh issue comment $ISSUE --body "Thank you for opening this issue!"
+      - uses: actions/checkout@v3
+      - name: Create comment
+        run: |
+          gh issue comment ${{ github.event.issue.number }} --body "Thanks for opening this issue! We'll take a look into it."
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ISSUE: ${{ github.event.issue.number }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
