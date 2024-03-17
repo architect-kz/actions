@@ -1,6 +1,10 @@
 name: Env print
 run-name: Env print
-on: [push]
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 jobs:
   job1:
     name: First job
