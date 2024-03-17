@@ -1,0 +1,19 @@
+name: Lessons
+run-name: Lessons
+
+on:
+  push:
+    branches:
+      - master
+      - development
+  pull_request:
+    branches:
+      - master
+  pull:
+    branches:
+      - main
+    tags:
+      - 'v*' # Trigger on tags starting with 'v' only on the 'main' branch
+  pull_request_review:
+    branches-ignore:
+      - ignored-branch
